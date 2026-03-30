@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EthicShield AI | Advanced Virtual Ethics Committee</title>
+    <title>EthicShield AI | Virtual EC Command Center</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Parsing & Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
@@ -20,135 +22,141 @@
 
     <style>
         :root { --navy: #0F172A; --orange: #F97316; --slate: #64748B; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FFFFFF; color: var(--navy); overflow: hidden; }
-        .navy-bg { background-color: var(--navy); }
-        .orange-text { color: var(--orange); }
-        .glass-sidebar { background: #FFFFFF; border-right: 1px solid #E2E8F0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FFFFFF; color: var(--navy); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .tab-btn { padding: 10px; font-size: 0.7rem; font-weight: 800; border-radius: 8px; border: 1px solid #E2E8F0; transition: 0.3s; text-transform: uppercase; }
-        .tab-active { background: var(--navy); color: white; border-color: var(--navy); }
+        .navy-gradient { background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); }
         
-        .persona-item { padding: 10px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; transition: 0.2s; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--slate); }
-        .persona-item:hover { background: #F8FAFC; }
-        .persona-active { background: #FFF7ED !important; border-color: var(--orange) !important; color: var(--orange) !important; }
+        /* 3D Logo CSS */
+        .logo-box {
+            width: 48px; height: 48px;
+            background: white;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 4px 4px 0px #F97316, 8px 8px 20px rgba(0,0,0,0.2);
+            font-weight: 900; color: var(--navy); font-size: 1.2rem;
+        }
 
-        .status-success { background: #F0FDF4; border-left: 5px solid #22C55E; color: #166534; }
-        .status-modify { background: #FFFBEB; border-left: 5px solid #F59E0B; color: #92400E; }
-        .status-scrutinize { background: #FEF2F2; border-left: 5px solid #EF4444; color: #991B1B; }
+        .sidebar { background: #FFFFFF; border-right: 1px solid #F1F5F9; overflow-y: auto; }
+        
+        .cat-btn { padding: 10px; font-size: 0.65rem; font-weight: 800; border-radius: 8px; border: 1px solid #E2E8F0; transition: 0.3s; text-transform: uppercase; width: 100%; }
+        .cat-active { background: var(--orange); color: white; border-color: var(--orange); box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3); }
+        
+        .role-link { padding: 12px; border-radius: 10px; cursor: pointer; transition: 0.2s; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 10px; color: var(--slate); border: 1px solid transparent; }
+        .role-link:hover { background: #F8FAFC; }
+        .role-active { background: #FFF7ED !important; border-color: #FFEDD5 !important; color: var(--orange) !important; }
 
-        .verification-banner { background: #F97316; color: white; text-align: center; padding: 6px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .scrutinize { border-left: 5px solid #EF4444; background: #FEF2F2; }
+        .modify { border-left: 5px solid #F59E0B; background: #FFFBEB; }
+        .success { border-left: 5px solid #22C55E; background: #F0FDF4; }
+
+        .main-content { background-color: #F8FAFC; flex: 1; overflow-y: auto; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body>
 
-    <div class="verification-banner">Verification with respective institutional ethics committees is mandatory.</div>
-
-    <header class="navy-bg text-white px-8 py-3 flex justify-between items-center shadow-xl z-50">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-white rounded flex items-center justify-center font-black text-navy text-xl shadow-lg">ES</div>
+    <!-- TOP NAV -->
+    <header class="navy-gradient text-white px-8 py-4 flex justify-between items-center shadow-xl z-50">
+        <div class="flex items-center gap-4">
+            <div class="logo-box">ES</div>
             <div>
-                <h1 class="text-lg font-extrabold tracking-tight">EthicShield <span class="orange-text">AI</span></h1>
-                <p class="text-[8px] uppercase tracking-widest font-bold opacity-60">National Virtual Ethics Assistant</p>
+                <h1 class="text-xl font-black tracking-tight">EthicShield <span class="text-orange-500 italic">AI</span></h1>
+                <p class="text-[9px] uppercase tracking-widest font-bold opacity-60">National Virtual EC Assistant</p>
             </div>
         </div>
-        <button id="driveBtn" onclick="handleAuthClick()" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-[10px] font-bold flex items-center gap-2 transition">
+        <button id="driveBtn" onclick="handleAuthClick()" class="bg-white/10 hover:bg-orange-500 px-5 py-2 rounded-full text-[10px] font-extrabold flex items-center gap-2 transition border border-white/10">
             <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" width="14"> 
             Google Cloud Storage
         </button>
     </header>
 
-    <main class="flex-1 flex overflow-hidden">
-        <aside class="w-80 glass-sidebar flex flex-col p-6 overflow-y-auto space-y-6 shadow-2xl">
-            <!-- 1. Review Category -->
-            <div class="space-y-2">
-                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest">1. Review Categorization</label>
-                <div class="grid grid-cols-1 gap-1">
-                    <button onclick="setCategory('full')" id="cat-full" class="tab-btn tab-active">Full Board Review</button>
-                    <button onclick="setCategory('exemption')" id="cat-exemption" class="tab-btn">Exemption Check</button>
-                    <button onclick="setCategory('complete')" id="cat-complete" class="tab-btn">Complete Audit</button>
+    <div class="flex flex-1 overflow-hidden">
+        <!-- LEFT SIDEBAR -->
+        <aside class="w-80 sidebar p-6 flex flex-col space-y-6">
+            <div>
+                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-3 block">Review Categorization</label>
+                <div class="space-y-1">
+                    <button onclick="setCategory('full')" id="cat-full" class="cat-btn cat-active">Full Board Review</button>
+                    <button onclick="setCategory('exemption')" id="cat-exemption" class="cat-btn">Exemption Check</button>
+                    <button onclick="setCategory('complete')" id="cat-complete" class="cat-btn">Complete Audit</button>
                 </div>
             </div>
 
-            <!-- 2. Persona Selection -->
-            <div class="space-y-2">
-                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest">2. Targeted Perspective</label>
-                <div class="bg-slate-50 p-2 rounded-xl space-y-1">
-                    <div onclick="setPersona('consensus')" id="p-consensus" class="persona-item persona-active">🌐 Multi-Persona Board</div>
-                    <div onclick="setPersona('chairperson')" id="p-chairperson" class="persona-item">🛡️ Chairperson</div>
-                    <div onclick="setPersona('secretary')" id="p-secretary" class="persona-item">📋 Member Secretary</div>
-                    <div onclick="setPersona('lawyer')" id="p-lawyer" class="persona-item">⚖️ Legal Expert</div>
-                    <div onclick="setPersona('clinician')" id="p-clinician" class="persona-item">🔬 Clinician/Scientist</div>
-                    <div onclick="setPersona('layperson')" id="p-layperson" class="persona-item">👤 Layperson</div>
+            <div>
+                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-3 block">Perspective Selection</label>
+                <div class="space-y-1">
+                    <div onclick="setPersona('consensus')" id="p-consensus" class="role-link role-active">🌐 Integrated Board</div>
+                    <div onclick="setPersona('chairperson')" id="p-chairperson" class="role-link">🛡️ Chairperson</div>
+                    <div onclick="setPersona('secretary')" id="p-secretary" class="role-link">📋 Member Secretary</div>
+                    <div onclick="setPersona('lawyer')" id="p-lawyer" class="role-link">⚖️ Legal Expert</div>
+                    <div onclick="setPersona('clinician')" id="p-clinician" class="role-link">🔬 Clinician/Scientist</div>
+                    <div onclick="setPersona('layperson')" id="p-layperson" class="role-link">👤 Layperson</div>
                 </div>
             </div>
 
-            <!-- 3. File Input -->
-            <div class="space-y-2">
-                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest">3. Protocol Package</label>
-                <div id="dropZone" class="border-2 border-dashed border-slate-200 hover:border-orange-500 rounded-2xl p-6 text-center cursor-pointer bg-slate-50 transition group">
-                    <span class="text-2xl block mb-1">📄</span>
-                    <p class="text-[9px] text-slate-500 font-bold uppercase">PDF/Word/Images</p>
-                    <input type="file" id="fileInput" class="hidden" multiple accept=".pdf,.docx,.jpg,.png,.jpeg">
+            <div class="pt-4 border-t border-slate-100">
+                <div id="dropZone" class="border-2 border-dashed border-slate-200 hover:border-orange-500 rounded-xl p-6 text-center cursor-pointer bg-slate-50 transition group">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase">📁 Load Protocol PDF/Word</p>
+                    <input type="file" id="fileInput" class="hidden" multiple accept=".pdf,.docx,.jpg,.png">
                 </div>
-                <div id="fileStatus" class="space-y-1"></div>
+                <div id="fileStatus" class="mt-2 space-y-1"></div>
             </div>
 
-            <button onclick="executeAnalysis()" id="runBtn" class="w-full navy-bg text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl transform active:scale-95 transition hover:opacity-90">
+            <button onclick="executeAnalysis()" id="runBtn" class="w-full navy-gradient text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg transform active:scale-95 transition">
                 Execute Targeted Audit
             </button>
         </aside>
 
-        <section class="flex-1 bg-slate-50 p-8 overflow-y-auto">
-            <div id="welcome" class="h-full flex flex-col items-center justify-center text-center opacity-40">
-                <div class="text-7xl mb-6">⚖️</div>
-                <h2 class="text-3xl font-extrabold text-navy italic">Select Analysis Parameters</h2>
-                <p class="max-w-xs mt-3 text-sm font-medium">Choose a committee member type and a review category to begin the AI scrutiny.</p>
+        <!-- MAIN DASHBOARD -->
+        <main class="main-content p-10 relative">
+            <div id="welcome" class="h-full flex flex-col items-center justify-center text-center opacity-30">
+                <div class="text-8xl mb-6">⚖️</div>
+                <h2 class="text-3xl font-black text-navy italic">Ready for Deliberation</h2>
+                <p class="max-w-sm mt-4 text-sm font-medium">Verify your protocol with AI-driven Multi-Persona Scrutiny based on ICMR 2017 Guidelines.</p>
             </div>
 
-            <div id="results" class="hidden space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div id="results" class="hidden space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 border-l-[10px] border-l-orange-500">
-                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Metric Score</p>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 border-l-[12px] border-l-orange-500">
+                        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Compliance Metric</p>
                         <h2 id="totalScore" class="text-5xl font-black text-navy">0%</h2>
                     </div>
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 col-span-2 flex items-center justify-between">
                         <div>
-                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Current View</p>
-                            <h3 id="viewLabel" class="text-xl font-extrabold text-navy italic">Integrated Consensus</h3>
+                            <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Current Perspective</p>
+                            <h3 id="viewLabel" class="text-xl font-extrabold text-navy italic">Consensus</h3>
                         </div>
                         <div class="w-24 h-24"><canvas id="scoreChart"></canvas></div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div class="lg:col-span-7 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200">
-                        <h2 id="roleTitle" class="text-2xl font-black text-navy uppercase mb-4 underline decoration-orange-500 underline-offset-8">Perspectives & Critique</h2>
-                        <p id="roleAnalysis" class="text-sm text-slate-600 leading-relaxed font-medium min-h-[200px] mt-6"></p>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-7 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                        <h2 id="roleTitle" class="text-2xl font-black text-navy uppercase border-b-4 border-orange-500 inline-block mb-6">Board Critique</h2>
+                        <p id="roleAnalysis" class="text-sm text-slate-600 leading-relaxed min-h-[200px] font-medium"></p>
                         
                         <div class="flex gap-4 mt-8">
-                            <button onclick="exportPDF()" class="flex-1 py-3 navy-bg text-white rounded-lg font-bold text-[9px] uppercase tracking-widest">Download PDF</button>
-                            <button onclick="exportWord()" class="flex-1 py-3 border-2 border-orange-500 text-orange-600 rounded-lg font-bold text-[9px] uppercase tracking-widest">Export Word</button>
+                            <button onclick="exportPDF()" class="flex-1 py-4 navy-gradient text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg">Download PDF</button>
+                            <button onclick="exportWord()" class="flex-1 py-4 border-2 border-orange-500 text-orange-600 rounded-xl font-black text-[10px] uppercase tracking-widest">Download Word</button>
                         </div>
                     </div>
 
-                    <div class="lg:col-span-5 space-y-4">
-                        <h3 class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-2">Verification Alerts</h3>
-                        <div id="checklistItems" class="space-y-2 max-h-[500px] overflow-y-auto"></div>
+                    <div class="lg:col-span-5 space-y-3">
+                        <h3 class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-4">Scrutiny Checklist</h3>
+                        <div id="checklistItems" class="space-y-2 max-h-[500px] overflow-y-auto pr-2"></div>
                     </div>
                 </div>
             </div>
-        </section>
-    </main>
+        </main>
+    </div>
 
-    <footer class="bg-white border-t border-slate-100 px-8 py-4 text-center z-50">
-        <p class="text-[9px] font-extrabold text-slate-300 uppercase tracking-[0.3em] mb-1">Intellectual Property & Academic Design</p>
-        <p class="text-xs font-bold text-navy">
-            Conceptualized & Designed by <span class="text-orange-600">Mr. Hemaraja Nayaka.S</span>, M.Sc SLP, DHA & ET, PGDBEME
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 px-8 py-5 text-center shadow-inner relative z-50">
+        <p class="text-[10px] font-extrabold text-slate-300 uppercase tracking-[0.4em] mb-1">Conceptualized and Academic Designed</p>
+        <p class="text-xs font-extrabold text-navy">
+            By <span class="text-orange-600">Mr. Hemaraja Nayaka.S</span>, M.Sc SLP, DHA & ET, PGDBEME
         </p>
-        <p class="text-[9px] text-slate-500 font-semibold">
-            Associate Professor in Audiology & Speech Language Pathology | Member, Yenepoya Ethics Committee-4
+        <p class="text-[9px] text-slate-500 font-bold mt-1 uppercase">
+            Associate Professor in Audiology & SLP | Member, Yenepoya Ethics Committee-4
         </p>
     </footer>
 
