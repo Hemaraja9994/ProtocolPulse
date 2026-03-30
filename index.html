@@ -3,118 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EthicShield AI | National Ethics Assistant</title>
+    <title>EthicShield AI | Virtual War Room</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-    <!-- PDF.js for reading PDF content -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Google APIs -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0f172a; color: #f8fafc; overflow: hidden; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .btn-primary { background: linear-gradient(135deg, #2563eb, #7c3aed); }
-        .active-tab { border-left: 4px solid #3b82f6; background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .perspective-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-bottom: 3px solid transparent; }
+        .active-perspective { border-bottom-color: #3b82f6; background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+        .shimmer { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; animation: shimmer 2s infinite; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
-<body class="min-h-screen flex">
+<body class="min-h-screen flex flex-col">
 
-    <!-- Sidebar -->
-    <aside class="w-64 glass border-r border-slate-800 flex flex-col hidden md:flex">
-        <div class="p-6">
-            <h1 class="text-2xl font-bold tracking-tighter text-white flex items-center gap-2">
-                <span class="text-blue-500">◈</span> EthicShield
-            </h1>
-            <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold">National AI Assistant</p>
-        </div>
-        <nav class="flex-1 px-4 space-y-2 mt-4">
-            <button onclick="showPage('audit')" id="tab-audit" class="sidebar-item active-tab w-full flex items-center gap-3 px-4 py-3 rounded-xl transition font-medium">New Audit</button>
-            <button onclick="showPage('archive')" id="tab-archive" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition font-medium text-slate-400 text-left">Cloud Archive</button>
-        </nav>
-    </aside>
-
-    <!-- Main -->
-    <main class="flex-1 flex flex-col h-screen overflow-y-auto">
-        <header class="p-6 flex justify-between items-center glass sticky top-0 z-10">
-            <h2 id="pageTitle" class="text-xl font-bold text-white">Live Ethical Review</h2>
-            <div id="statusIndicator" class="text-xs font-bold text-blue-400 uppercase tracking-widest">System Ready</div>
-        </header>
-
-        <!-- Audit Page -->
-        <div id="auditPage" class="p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Left Side: Input -->
-            <div class="lg:col-span-4 space-y-6">
-                <div class="glass p-6 rounded-3xl space-y-4">
-                    <h3 class="text-xs font-bold uppercase text-slate-500">Metadata</h3>
-                    <input type="text" id="institute" placeholder="Institute Name" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none">
-                    <input type="text" id="reviewerName" placeholder="Reviewer Name" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none">
-                    <select id="designation" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-sm outline-none">
-                        <option>Member Secretary</option>
-                        <option>Chairperson</option>
-                        <option>Scientific Member</option>
-                    </select>
-
-                    <div class="pt-4 border-t border-slate-800">
-                        <label class="block text-xs text-slate-400 mb-2">Protocol Package (PDFs)</label>
-                        <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-2xl p-6 text-center cursor-pointer transition">
-                            <p class="text-[10px] text-slate-500">Click to upload Protocol, ICF, CVs</p>
-                            <input type="file" id="fileInput" multiple accept="application/pdf" class="hidden">
-                        </div>
-                        <!-- File List View -->
-                        <div id="fileList" class="mt-3 space-y-2"></div>
-                        
-                        <button onclick="processDocuments()" id="analyzeBtn" class="w-full mt-6 btn-primary text-white py-4 rounded-2xl font-bold shadow-lg transform active:scale-95 transition">
-                            Start AI Analysis
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Side: Results -->
-            <div class="lg:col-span-8">
-                <div id="placeholder" class="h-64 flex flex-col items-center justify-center opacity-20 border-2 border-dashed border-slate-800 rounded-3xl">
-                    <p>No results to display yet.</p>
-                </div>
-
-                <div id="results" class="hidden space-y-6">
-                    <!-- Progress / Risk Header -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="glass p-6 rounded-3xl border-l-4 border-blue-500">
-                            <p class="text-[10px] uppercase text-slate-400 font-bold">Recommended Category</p>
-                            <h2 id="riskBadge" class="text-2xl font-black text-white italic">---</h2>
-                        </div>
-                        <div class="glass p-6 rounded-3xl border-l-4 border-purple-500">
-                            <p class="text-[10px] uppercase text-slate-400 font-bold">Compliance Score</p>
-                            <h2 id="complianceScore" class="text-2xl font-black text-white">0%</h2>
-                        </div>
-                    </div>
-
-                    <!-- Visuals -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="glass p-6 rounded-3xl h-64 flex justify-center">
-                            <canvas id="complianceChart"></canvas>
-                        </div>
-                        <div id="checklistItems" class="glass p-6 rounded-3xl space-y-3 overflow-y-auto max-h-64"></div>
-                    </div>
-
-                    <div class="glass p-6 rounded-3xl">
-                        <h4 class="text-sm font-bold text-blue-400 mb-2">Executive Summary</h4>
-                        <p id="aiSummary" class="text-sm text-slate-300 leading-relaxed"></p>
-                        <button onclick="downloadPDF()" class="mt-4 px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold transition">Download Official Report</button>
-                    </div>
-                </div>
+    <!-- Top Navigation -->
+    <nav class="p-4 glass sticky top-0 z-50 flex justify-between items-center border-b border-white/5">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center font-black text-white shadow-lg shadow-blue-900/20">ES</div>
+            <div>
+                <h1 class="text-lg font-bold tracking-tight">EthicShield <span class="text-blue-500 italic">AI</span></h1>
+                <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">National Virtual Ethics Committee</p>
             </div>
         </div>
+        <button id="driveBtn" onclick="handleAuthClick()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-full text-xs font-bold transition border border-white/5">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" width="16"> 
+            Connect My Google Drive
+        </button>
+    </nav>
 
-        <!-- Archive Page -->
-        <div id="archivePage" class="hidden p-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="archiveGrid"></div>
-        </div>
+    <main class="flex-1 max-w-7xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Upload & Config -->
+        <aside class="lg:col-span-4 space-y-6">
+            <div class="glass p-8 rounded-[2.5rem] border border-white/5 space-y-6">
+                <div class="space-y-4">
+                    <h3 class="text-[10px] font-black uppercase text-blue-500 tracking-[0.2em]">Institutional Profile</h3>
+                    <input type="text" id="institute" placeholder="Organization Name (e.g. AIIMS)" class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl px-5 py-4 text-sm focus:border-blue-500 outline-none transition">
+                    
+                    <h3 class="text-[10px] font-black uppercase text-blue-500 tracking-[0.2em] pt-2">Protocol Package</h3>
+                    <div id="dropZone" class="border-2 border-dashed border-slate-800 hover:border-blue-500/50 rounded-3xl p-10 text-center cursor-pointer transition bg-slate-950/30 group">
+                        <div class="text-4xl mb-3 group-hover:scale-110 transition">📁</div>
+                        <p class="text-[11px] text-slate-400 font-medium">Drag & Drop Study PDF</p>
+                        <input type="file" id="fileInput" class="hidden" accept=".pdf">
+                    </div>
+                    <div id="fileInfo" class="hidden flex items-center justify-between bg-blue-500/5 p-3 rounded-xl border border-blue-500/20">
+                        <span id="fileNameDisplay" class="text-[10px] font-bold text-blue-400 truncate w-48"></span>
+                        <span class="text-[9px] bg-blue-500 text-white px-2 py-0.5 rounded-full font-black">READY</span>
+                    </div>
+                </div>
+
+                <button onclick="startWarRoom()" id="runBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-900/20 transition transform active:scale-95">
+                    Execute Multi-Persona Audit
+                </button>
+            </div>
+        </aside>
+
+        <!-- Right: The War Room Dashboard -->
+        <section class="lg:col-span-8 space-y-6">
+            
+            <div id="emptyState" class="h-full min-h-[500px] glass rounded-[3rem] flex flex-col items-center justify-center text-center p-12 opacity-50">
+                <div class="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center mb-6 text-4xl border border-white/5">⚖️</div>
+                <h2 class="text-2xl font-bold text-white">Committee War Room</h2>
+                <p class="text-slate-400 text-sm max-w-sm mt-3">Upload your protocol. The AI will simultaneously analyze it from Scientific, Legal, Social, and Layperson perspectives based on ICMR 2017 Guidelines.</p>
+            </div>
+
+            <div id="dashboardUI" class="hidden space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                
+                <!-- Comparison Radar / Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass p-6 rounded-3xl col-span-2 flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Combined Compliance</p>
+                            <h2 id="totalScore" class="text-5xl font-black text-white">0%</h2>
+                        </div>
+                        <div class="h-24 w-24">
+                            <canvas id="miniChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass p-6 rounded-3xl flex flex-col justify-center border-l-4 border-yellow-500">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Decision Status</p>
+                        <h2 id="riskStatus" class="text-xl font-bold text-white mt-1">Deliberating...</h2>
+                    </div>
+                </div>
+
+                <!-- Perspective Navigation -->
+                <div class="flex glass rounded-2xl overflow-hidden border border-white/5">
+                    <button onclick="switchPerspective('scientific')" id="btn-scientific" class="perspective-btn flex-1 py-4 text-[10px] font-black uppercase tracking-tighter active-perspective">Scientific</button>
+                    <button onclick="switchPerspective('legal')" id="btn-legal" class="perspective-btn flex-1 py-4 text-[10px] font-black uppercase tracking-tighter">Legal</button>
+                    <button onclick="switchPerspective('social')" id="btn-social" class="perspective-btn flex-1 py-4 text-[10px] font-black uppercase tracking-tighter">Social/Ethical</button>
+                    <button onclick="switchPerspective('layperson')" id="btn-layperson" class="perspective-btn flex-1 py-4 text-[10px] font-black uppercase tracking-tighter">Layperson</button>
+                </div>
+
+                <!-- Active Content -->
+                <div class="glass p-8 rounded-[2.5rem] min-h-[350px]">
+                    <div id="perspectiveDisplay" class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <!-- Dynamic View -->
+                    </div>
+                </div>
+
+                <!-- Save/Export -->
+                <div class="flex gap-4">
+                    <button onclick="uploadToUserDrive()" class="flex-1 bg-green-500/10 border border-green-500/20 text-green-400 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-green-500 hover:text-white transition shadow-lg">
+                        Sync Assessment to My Drive
+                    </button>
+                    <button onclick="downloadPDFReport()" class="px-10 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition border border-white/10">
+                        Export PDF
+                    </button>
+                </div>
+            </div>
+        </section>
     </main>
 
     <script src="app.js"></script>
