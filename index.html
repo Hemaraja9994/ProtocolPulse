@@ -3,129 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EthicShield AI | Virtual EC War Room</title>
+    <title>EthicShield AI | Multi-Persona EC War Room</title>
     
-    <!-- CSS & UI -->
+    <!-- CSS & UI Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     
-    <!-- File Parsing Packages -->
+    <!-- Parsing & Logic Packages -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js'></script>
-    
-    <!-- Logic & Export -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- Export Packages (PDF & Word) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
         :root { --emerald: #10b981; --amethyst: #8b5cf6; --night: #050505; }
-        body { font-family: 'Space Grotesk', sans-serif; background-color: var(--night); color: #e2e8f0; overflow: hidden; }
+        body { font-family: 'Space Grotesk', sans-serif; background-color: var(--night); color: #e2e8f0; overflow-x: hidden; }
         .glass-card { background: rgba(15, 17, 21, 0.85); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(20px); }
         .aurora-text { background: linear-gradient(to right, #10b981, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .neon-border { border: 1px solid var(--emerald); box-shadow: 0 0 20px rgba(16, 185, 129, 0.15); }
-        .btn-aurora { background: linear-gradient(135deg, #10b981, #3b82f6); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-aurora { background: linear-gradient(135deg, #10b981, #3b82f6); transition: 0.4s; }
         .btn-aurora:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4); }
         .role-btn { border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
         .role-active { background: rgba(16, 185, 129, 0.1); border-color: var(--emerald); color: var(--emerald); }
         .scrutinize { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.05); }
         .modify { border-left: 4px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
         .success { border-left: 4px solid #10b981; background: rgba(16, 185, 129, 0.05); }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
 <body class="min-h-screen flex">
 
-    <!-- SIDEBAR: Credits & Controls -->
-    <aside class="w-80 glass-card border-r border-white/5 flex flex-col p-6 z-50">
+    <!-- SIDEBAR -->
+    <aside class="w-96 glass-card border-r border-white/5 flex flex-col p-6 z-50 overflow-y-auto">
         <div class="mb-8">
-            <h1 class="text-3xl font-bold tracking-tighter aurora-text">EthicShield</h1>
-            <p class="text-[10px] uppercase tracking-[0.3em] font-bold text-slate-500 mt-1">National Virtual EC</p>
+            <h1 class="text-3xl font-bold tracking-tighter aurora-text">EthicShield AI</h1>
+            <p class="text-[10px] uppercase tracking-[0.3em] font-bold text-slate-500 mt-1">National Virtual EC Auditor</p>
         </div>
 
-        <div class="flex-1 space-y-6 overflow-y-auto pr-2">
+        <!-- Designer Credits -->
+        <div class="p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/20 mb-8">
+            <p class="text-[10px] font-black uppercase text-emerald-500 mb-2 tracking-widest">Conceptualized & Designed by</p>
+            <p class="text-xs font-bold text-white leading-tight">Mr. Hemaraja Nayaka.S</p>
+            <p class="text-[9px] text-slate-400 mt-1">
+                M.Sc SLP, DHA & ET, PGDBEME<br>
+                Associate Professor in Audiology & SLP<br>
+                Member, Yenepoya Ethics Committee-4
+            </p>
+        </div>
+
+        <div class="space-y-6">
             <div class="space-y-2">
-                <label class="text-[10px] font-black uppercase text-emerald-500">Institute Name</label>
-                <input type="text" id="institute" placeholder="e.g. Yenepoya University" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs focus:border-emerald-500 outline-none transition">
+                <label class="text-[10px] font-black uppercase text-slate-500">Institutional Identity</label>
+                <input type="text" id="institute" placeholder="Organization Name" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs focus:border-emerald-500 outline-none transition">
             </div>
 
-            <!-- Multi-Format Upload -->
             <div class="space-y-2">
-                <label class="text-[10px] font-black uppercase text-emerald-500">Upload Package (PDF, Word, Images)</label>
-                <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-emerald-500/50 rounded-2xl p-6 text-center cursor-pointer bg-black/20 group transition">
-                    <span class="text-3xl block mb-2 group-hover:scale-110 transition">📄</span>
-                    <p class="text-[10px] text-slate-500">Drop files or Click to Browse</p>
+                <label class="text-[10px] font-black uppercase text-slate-500">Protocol Package (PDF/DOCX/IMG)</label>
+                <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-emerald-500 rounded-2xl p-8 text-center cursor-pointer bg-black/20 group transition">
+                    <span class="text-3xl block mb-2">📥</span>
+                    <p class="text-[10px] text-slate-500">Drop files or Browse</p>
                     <input type="file" id="fileInput" class="hidden" multiple accept=".pdf,.docx,.jpg,.png,.jpeg">
                 </div>
-                <div id="fileStatus" class="space-y-1 mt-2"></div>
+                <div id="fileStatus" class="space-y-1"></div>
             </div>
 
-            <button onclick="startMultiPersonaAudit()" id="runBtn" class="w-full btn-aurora text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-2xl">
-                Run Virtual Committee
+            <button onclick="startCommitteeAudit()" id="runBtn" class="w-full btn-aurora text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-2xl">
+                Run Multi-Persona Audit
             </button>
 
             <!-- Persona Switcher -->
             <div id="roleSelector" class="hidden space-y-2 pt-6 border-t border-white/5">
-                <p class="text-[10px] font-black uppercase text-slate-500 mb-3">View Member Perspective</p>
+                <p class="text-[10px] font-black uppercase text-emerald-500 mb-3 tracking-widest">Committee Personas</p>
                 <div class="grid grid-cols-1 gap-2">
-                    <button onclick="renderRole('consensus')" id="btn-consensus" class="role-btn role-active p-3 rounded-lg text-[10px] font-bold text-left">🌐 Full Board Consensus</button>
+                    <button onclick="renderRole('consensus')" id="btn-consensus" class="role-btn role-active p-3 rounded-lg text-[10px] font-bold text-left">🌐 Integrated Consensus</button>
                     <button onclick="renderRole('lawyer')" id="btn-lawyer" class="role-btn p-3 rounded-lg text-[10px] font-bold text-left">⚖️ Legal Expert</button>
                     <button onclick="renderRole('clinician')" id="btn-clinician" class="role-btn p-3 rounded-lg text-[10px] font-bold text-left">🔬 Scientific Member</button>
                     <button onclick="renderRole('layperson')" id="btn-layperson" class="role-btn p-3 rounded-lg text-[10px] font-bold text-left">👤 Common Person</button>
                     <button onclick="renderRole('secretary')" id="btn-secretary" class="role-btn p-3 rounded-lg text-[10px] font-bold text-left">📋 Member Secretary</button>
+                    <button onclick="renderRole('chairperson')" id="btn-chairperson" class="role-btn p-3 rounded-lg text-[10px] font-bold text-left">🛡️ Chairperson</button>
                 </div>
             </div>
-        </div>
-
-        <!-- Designer Credits -->
-        <div class="pt-6 border-t border-white/5 mt-6">
-            <p class="text-[9px] text-slate-500 leading-tight">
-                Conceptualized & Designed by:<br>
-                <span class="text-emerald-400 font-bold">Mr. Hemaraja Nayaka.S</span><br>
-                M.Sc SLP, DHA & ET, PGDBEME<br>
-                Associate Professor, Yenepoya Ethics Committee-4 Member
-            </p>
         </div>
     </aside>
 
     <!-- MAIN VIEW -->
     <main class="flex-1 h-screen overflow-y-auto bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black p-10">
         
-        <div id="welcome" class="h-full flex flex-col items-center justify-center text-center opacity-20">
+        <div id="welcome" class="h-full flex flex-col items-center justify-center text-center opacity-30">
             <div class="text-8xl mb-6">⚖️</div>
-            <h2 class="text-4xl font-bold italic">EC Virtual War Room</h2>
-            <p class="max-w-md mt-4">Load your protocol documents to begin a multi-persona ethical scrutiny session.</p>
+            <h2 class="text-4xl font-bold italic">Virtual War Room</h2>
+            <p class="max-w-md mt-4 text-sm">Verification with respective institutional ethics committees is mandatory. AI provided for assistance only.</p>
         </div>
 
         <div id="dashboard" class="hidden space-y-8 animate-in fade-in zoom-in duration-700">
-            <!-- Summary Header -->
+            <!-- Header Stats -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="glass-card p-8 rounded-[2rem] border-l-4 border-emerald-500">
                     <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Aggregate Compliance</p>
                     <h2 id="totalScore" class="text-6xl font-black text-white mt-1">0%</h2>
                 </div>
-                <div class="glass-card p-8 rounded-[2rem] col-span-2 flex items-center justify-between overflow-hidden relative">
-                    <div class="z-10">
-                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Decision Forecast</p>
-                        <h3 id="forecastText" class="text-2xl font-bold text-emerald-400 mt-1 italic">Analyzing...</h3>
+                <div class="glass-card p-8 rounded-[2rem] col-span-2 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Status Tagline</p>
+                        <h3 class="text-xl font-bold text-emerald-400 mt-1 italic">Verification Required with Institutional Ethics Committees</h3>
                     </div>
-                    <canvas id="miniChart" class="max-h-24"></canvas>
                 </div>
             </div>
 
-            <!-- Multi-Persona Viewport -->
+            <!-- Analysis View -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div class="lg:col-span-7 glass-card p-10 rounded-[3rem] neon-border">
-                    <h2 id="roleTitle" class="text-3xl font-black italic uppercase aurora-text mb-4">Consensus</h2>
-                    <p id="roleAnalysis" class="text-sm text-slate-300 leading-relaxed min-h-[200px]"></p>
-                    
-                    <div class="flex gap-4 mt-8">
-                        <button onclick="saveToDrive()" class="flex-1 py-4 glass-card border border-emerald-500/30 text-emerald-400 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition">
-                            Sync to My Drive
-                        </button>
-                        <button onclick="exportPDF()" class="px-10 py-4 bg-slate-800 rounded-2xl font-bold text-[10px] uppercase tracking-widest text-white transition hover:bg-white hover:text-black">
-                            Export 
+                <div class="lg:col-span-7 glass-card p-10 rounded-[3rem]
