@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EthicShield AI | National Virtual EC Command Center</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Heavy Duty Engines -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+
+    <style>
+        :root { --navy: #0F172A; --orange: #F97316; --slate: #64748B; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FFFFFF; color: var(--navy); display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+        
+        .navy-gradient { background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); }
+        .logo-box { width: 48px; height: 48px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 4px 4px 0px #F97316, 8px 8px 20px rgba(0,0,0,0.1); font-weight: 900; color: var(--navy); font-size: 1.2rem; border: 1px solid #E2E8F0; }
+        .sidebar { background: #FFFFFF; border-right: 1px solid #F1F5F9; height: calc(100vh - 140px); overflow-y: auto; }
+        
+        .cat-btn { padding: 10px; font-size: 0.65rem; font-weight: 800; border-radius: 8px; border: 1px solid #E2E8F0; transition: 0.3s; text-transform: uppercase; width: 100%; color: var(--navy); }
+        .cat-active { background: var(--orange); color: white; border-color: var(--orange); box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3); }
+        
+        .role-link { padding: 12px; border-radius: 10px; cursor: pointer; transition: 0.2s; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 10px; color: var(--slate); border: 1px solid transparent; }
+        .role-active { background: #FFF7ED !important; border-color: #FFEDD5 !important; color: var(--orange) !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+
+        .scrutinize { border-left: 6px solid #EF4444; background: #FEF2F2; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .modify { border-left: 6px solid #F59E0B; background: #FFFBEB; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .success { border-left: 6px solid #22C55E; background: #F0FDF4; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+
+        .verification-banner { background: #FFF7ED; color: #C2410C; text-align: center; padding: 8px; font-size: 0.7rem; font-weight: 700; border-bottom: 1px solid #FFEDD5; }
+        .main-content { background-color: #F8FAFC; flex: 1; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+    <div class="verification-banner uppercase tracking-widest">
+        ⚠️ Official verification with institutional ethics committees is mandatory.
+    </div>
+
+    <!-- HEADER -->
+    <header class="navy-gradient text-white px-8 py-4 flex justify-between items-center shadow-xl z-50">
+        <div class="flex items-center gap-4">
+            <div class="logo-box">ES</div>
+            <div>
+                <h1 class="text-xl font-black tracking-tight">EthicShield <span class="text-orange-500 italic">AI</span></h1>
+                <p class="text-[9px] uppercase tracking-widest font-bold opacity-60">National Virtual EC Assistant</p>
+            </div>
+        </div>
+        <button id="driveBtn" onclick="handleAuthClick()" class="bg-white/10 hover:bg-orange-500 px-5 py-2 rounded-full text-[10px] font-extrabold flex items-center gap-2 transition border border-white/10">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" width="14"> 
+            Google Cloud Storage
+        </button>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- SIDEBAR -->
+        <aside class="w-80 sidebar p-6 flex flex-col space-y-6">
+            <div>
+                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-3 block">Review Type</label>
+                <div class="grid grid-cols-1 gap-1">
+                    <button onclick="setCategory('full')" id="cat-full" class="cat-btn cat-active">Full Board</button>
+                    <button onclick="setCategory('exemption')" id="cat-exemption" class="cat-btn">Exemption Check</button>
+                    <button onclick="setCategory('complete')" id="cat-complete" class="cat-btn">Complete Audit</button>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-3 block">Member Persona</label>
+                <div class="space-y-1">
+                    <div onclick="setPersona('consensus')" id="p-consensus" class="role-link role-active">🌐 Joint Consensus</div>
+                    <div onclick="setPersona('chairperson')" id="p-chairperson" class="role-link">🛡️ Chairperson</div>
+                    <div onclick="setPersona('secretary')" id="p-secretary" class="role-link">📋 Member Secretary</div>
+                    <div onclick="setPersona('lawyer')" id="p-lawyer" class="role-link">⚖️ Legal Expert</div>
+                    <div onclick="setPersona('clinician')" id="p-clinician" class="role-link">🔬 Scientist</div>
+                    <div onclick="setPersona('layperson')" id="p-layperson" class="role-link">👤 Layperson</div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100">
+                <div id="dropZone" class="border-2 border-dashed border-slate-200 hover:border-orange-500 rounded-xl p-6 text-center cursor-pointer bg-slate-50 transition group">
+                    <p class="text-[10px] text-slate-500 font-extrabold uppercase">📁 Click to Load Files</p>
+                    <input type="file" id="fileInput" class="hidden" multiple accept=".pdf,.docx,.jpg,.png">
+                </div>
+                <div id="fileStatus" class="mt-2 space-y-1"></div>
+            </div>
+
+            <button onclick="executeAnalysis()" id="runBtn" class="w-full navy-gradient text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg transform active:scale-95 transition">
+                Begin Audit Session
+            </button>
+        </aside>
+
+        <!-- DASHBOARD -->
+        <main class="main-content p-10">
+            <div id="welcome" class="h-full flex flex-col items-center justify-center text-center opacity-30">
+                <div class="text-8xl mb-6">⚖️</div>
+                <h2 class="text-3xl font-black text-navy italic">Ready for Deliberation</h2>
+                <p class="max-w-sm mt-4 text-sm font-medium">Load protocols to initiate multi-persona scrutiny based on ICMR 2017 Guidelines.</p>
+            </div>
+
+            <div id="resultsUI" class="hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 border-l-[12px] border-l-orange-500">
+                        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Compliance Metric</p>
+                        <h2 id="totalScore" class="text-5xl font-black text-navy">0%</h2>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 col-span-2 flex items-center justify-between">
+                        <div>
+                            <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Current Perspective</p>
+                            <h3 id="viewLabel" class="text-xl font-extrabold text-navy italic uppercase tracking-tighter">Consensus</h3>
+                        </div>
+                        <div class="w-24 h-24"><canvas id="scoreChart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-7">
+                        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
+                            <h2 id="roleTitle" class="text-2xl font-black text-navy uppercase border-b-4 border-orange-500 inline-block mb-6">Critique</h2>
+                            <p id="roleAnalysis" class="text-sm text-slate-600 leading-relaxed min-h-[200px] font-medium"></p>
+                            <div class="flex gap-4 mt-8">
+                                <button onclick="exportPDF()" class="flex-1 py-4 navy-gradient text-white rounded-xl font-black text-[10px] uppercase tracking-widest">Download PDF</button>
+                                <button onclick="exportWord()" class="flex-1 py-4 border-2 border-orange-500 text-orange-600 rounded-xl font-black text-[10px] uppercase tracking-widest">Download Word</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-5">
+                        <h3 class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-4 mb-3">Verification Checklist</h3>
+                        <div id="checklistItems" class="space-y-3 max-h-[500px] overflow-y-auto pr-2"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 px-8 py-4 text-center shadow-inner z-50">
+        <p class="text-[9px] font-extrabold text-slate-400 uppercase tracking-[0.4em] mb-1">Conceptualized and Academic Designed</p>
+        <p class="text-xs font-extrabold text-navy">
+            By <span class="text-orange-600">Mr. Hemaraja Nayaka.S</span>, M.Sc SLP, DHA & ET, PGDBEME
+        </p>
+        <p class="text-[9px] text-slate-500 font-bold mt-1 uppercase">
+            Associate Professor in Audiology & SLP | Member, Yenepoya Ethics Committee-4
+        </p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
